@@ -15,12 +15,12 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-//package org.apache.beam.examples.cookbook;
+package org.apache.beam.gcp;
 
 //import com.google.api.services.bigquery.model.TableRow;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.io.TextIO;
-import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO;
+//import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO;
 import org.apache.beam.sdk.options.Description;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
@@ -70,8 +70,8 @@ public class JoinFile {
 /**
  * Join two collections, using country code as the key.
  */
-static PCollection<String> joinEvents(PCollection<TableRow> deviceTable,
-    PCollection<TableRow> contactTable) throws Exception {
+static PCollection<String> joinEvents(PCollection<String> deviceTable,
+    PCollection<String> contactTable) throws Exception {
 
   final TupleTag<String> deviceInfoTag = new TupleTag<String>();
   final TupleTag<String> contactInfoTag = new TupleTag<String>();
@@ -80,7 +80,7 @@ static PCollection<String> joinEvents(PCollection<TableRow> deviceTable,
   // codes in both cases.
   PCollection<KV<String, String>> deviceInfo = deviceTable.apply(
       ParDo.of(new CreateDeviceDataFn()));
-  PCollection<KV<String>> contactInfo = contactTable.apply(
+  PCollection<KV<String, String>> contactInfo = contactTable.apply(
       ParDo.of(new CreateContactDataFn()));
 
   // country code 'key' -> CGBKR (<event info>, <country name>)
@@ -98,7 +98,7 @@ static PCollection<String> joinEvents(PCollection<TableRow> deviceTable,
         public void processElement(ProcessContext c) {
           KV<String, CoGbkResult> e = c.element();
           String contact_seq = e.getKey();
-          String countact = "none";
+          String contact = "none";
           contact = e.getValue().getOnly(contactInfoTag);
           for (String deviceInfo : c.element().getValue().getAll(deviceInfoTag)) {
             // Generate a string that combines information from both collection values
@@ -124,9 +124,11 @@ static class CreateDeviceDataFn extends DoFn<String, KV<String, String>> {
   @ProcessElement
   public void processElement(ProcessContext c) {
     String devicename = c.element();
+    String seq = new String();
 
     for (int i = 1; i <= MAX_LINES; i++) {
-          c.output(KV.of(String.valueOf(i)), devicename);
+          seq = String.valueOf(i);
+          c.output(KV.of(seq, devicename));
     }
 
   }
