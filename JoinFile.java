@@ -57,12 +57,12 @@ public class JoinFile {
 
   // A 1000-row sample of the GDELT data here: gdelt-bq:full.events.
   private static final String DEVICE_TABLE =
-    "gs://bespin-bigtable-apachebeam/A*.txt";
+    "gs://bespin-bigtable-apachebeam/test/A*.txt";
     // A table that maps country codes to country names.
   private static final String CONTACT_TABLE =
-    "gs://bespin-bigtable-apachebeam/b.csv";
+    "gs://bespin-bigtable-apachebeam/test/b.csv";
 
-  private static final int MAX_LINES = 300;
+  private static final int MAX_LINES = 15;
 
   private static int sequence_key = 1;
 
@@ -100,9 +100,9 @@ static PCollection<String> joinEvents(PCollection<String> deviceTable,
           String contact_seq = e.getKey();
           String contact = "none";
           contact = e.getValue().getOnly(contactInfoTag);
-          for (String deviceInfo : c.element().getValue().getAll(deviceInfoTag)) {
+          for (String device : c.element().getValue().getAll(deviceInfoTag)) {
             // Generate a string that combines information from both collection values
-            c.output(KV.of(deviceInfo + "_" + contact_seq, contact ));
+            c.output(KV.of(device + "_" + contact_seq, contact ));
           }
         }
     }));
@@ -124,7 +124,7 @@ static class CreateDeviceDataFn extends DoFn<String, KV<String, String>> {
   @ProcessElement
   public void processElement(ProcessContext c) {
     String devicename = c.element();
-    String seq = new String();
+    String seq; 
 
     for (int i = 1; i <= MAX_LINES; i++) {
           seq = String.valueOf(i);
@@ -169,8 +169,26 @@ public static void main(String[] args) throws Exception {
   PCollection<String> contactTable =
        p.apply("ReadLines", TextIO.read().from(CONTACT_TABLE));
 
+/*
+  PCollection<KV<String, String>> deviceInfo = deviceTable.apply(
+      ParDo.of(new CreateDeviceDataFn()));
+  PCollection<KV<String, String>> contactInfo = contactTable.apply(
+      ParDo.of(new CreateContactDataFn()));
+
+  PCollection<String> formattedResults = contactInfo
+      .apply("Format", ParDo.of(new DoFn<KV<String, String>, String>() {
+        @ProcessElement
+        public void processElement(ProcessContext c) {
+          String outputstring = c.element().getKey() + ", " + c.element().getValue();
+          c.output(outputstring);
+        }
+      }));
+*/
+
   PCollection<String> formattedResults = joinEvents(deviceTable, contactTable);
+
   formattedResults.apply(TextIO.write().to(options.getOutput()));
+
   p.run().waitUntilFinish();
 }
 
