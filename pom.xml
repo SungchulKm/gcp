@@ -21,7 +21,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.example</groupId>
-  <artifactId>word-count-beam</artifactId>
+  <artifactId>bigtable-beam</artifactId>
   <version>0.1</version>
 
   <packaging>jar</packaging>
@@ -278,25 +278,17 @@
       <version>${beam.version}</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.apache.beam</groupId>
+      <artifactId>beam-sdks-java-extensions-protobuf</artifactId>
+      <version>${beam.version}</version>
+    </dependency>
+
     <!-- Dependencies below this line are specific dependencies needed by the examples code. -->
     <dependency>
       <groupId>com.google.api-client</groupId>
       <artifactId>google-api-client</artifactId>
       <version>${google-clients.version}</version>
-      <exclusions>
-        <!-- Exclude an old version of guava that is being pulled
-             in by a transitive dependency of google-api-client -->
-        <exclusion>
-          <groupId>com.google.guava</groupId>
-          <artifactId>guava-jdk5</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-
-    <dependency>
-      <groupId>com.google.apis</groupId>
-      <artifactId>google-api-services-bigquery</artifactId>
-      <version>${bigquery.version}</version>
       <exclusions>
         <!-- Exclude an old version of guava that is being pulled
              in by a transitive dependency of google-api-client -->
@@ -383,7 +375,8 @@
       <version>${beam.version}</version>
       <scope>test</scope>
     </dependency>
-
+ 
+<!--
     <dependency>
       <groupId>com.google.cloud.bigtable</groupId>
       <artifactId>bigtable-hbase-1.1</artifactId>
@@ -395,11 +388,18 @@
       <artifactId>hbase-client</artifactId>
       <version>${hbase.version}</version>
     </dependency>
-
+-->
     <dependency>
         <groupId>com.google.cloud.bigtable</groupId>
         <artifactId>bigtable-hbase-beam</artifactId>
         <version>${bigtable1.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>com.google.cloud.bigtable</groupId>
+      <artifactId>bigtable-client-core</artifactId>
+      <version>1.0.0-pre4</version>
+    </dependency>
+
   </dependencies>
 </project>
